@@ -24,12 +24,15 @@ const App = () => {
     event.preventDefault()
     const numberObject = {
       name: newName,
-      number: newNumber
+      number: newNumber,
+      id: contacts.length + 1
+      
     }
     if (contacts.find(cont => cont.name === newName)) {
-
+      
       const contactToChange = contacts.find(cont => cont.name === newName)
       if (window.confirm(`${contactToChange.name} is already added to phonebook, replace the old number with a new one?`)) {
+        numberObject.id=contactToChange.id
         personService
           .update(contactToChange.id, numberObject)
           .then(() => {

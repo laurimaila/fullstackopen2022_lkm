@@ -1,4 +1,6 @@
 import personService from '../services/persons'
+import SingleContact from './SingleContact'
+
 const Contacts = ({ contacts, filter, setContacts }) => {
 
     const deleteContact = (id) => {
@@ -17,13 +19,12 @@ const Contacts = ({ contacts, filter, setContacts }) => {
             {contacts.filter(f => f.name.toLowerCase().includes(filter.toLowerCase())
                 || filter === '')
                 .map(contact =>
-                    <li key={contact.name}>{contact.name} {contact.number}
-                        {' '}<button onClick={() =>
-                            deleteContact(contact.id)}>Delete</button>
-                    </li>
-                )}
+                    <SingleContact key={contact.id} contact={contact}  deleteContact={deleteContact} />
+                )}    
+                        
         </ul>
     );
 }
 
-export default Contacts   
+export default Contacts
+
