@@ -3,14 +3,17 @@ import personService from './services/persons'
 import PersonForm from './components/PersonForm'
 import Filter from './components/Filter'
 import Contacts from './components/Contacts'
-
-
+import './App.css'
+import Notification from './components/Notification'
+import ErrorNotification from './components/ErrorNotification'
 
 const App = () => {
   const [contacts, setContacts] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [changeMessage, setChangeMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -38,7 +41,22 @@ const App = () => {
           .then(() => {
             setContacts(contacts.map(f => f.id !== contactToChange.id ? f : numberObject
             ))
-          })
+            setChangeMessage(
+              `Changed ${contactToChange.name}`
+            )
+            setTimeout(() => {
+              setChangeMessage(null)
+            }, 3000)
+          }).catch(error => {
+              setErrorMessage(
+                `Information of ${contactToChange.name} has already been removed from server`
+              )
+              
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+            }
+          )
       }
     } else {
 
@@ -46,8 +64,14 @@ const App = () => {
         .create(numberObject)
         .then(returnedNote => {
           setContacts(contacts.concat(returnedNote))
+          setChangeMessage(
+            `Added ${numberObject.name}`
+          )
+          setTimeout(() => {
+            setChangeMessage(null)
+          }, 3000)
         })
-      console.log("added", newName)
+        
     }
 
     setNewName('')
@@ -66,6 +90,9 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
 
+      <Notification message={changeMessage}/>
+      <ErrorNotification message={errorMessage}/>
+
       <Filter filter={filter} setFilter={setFilter} />
 
       <h3>Add a new contact</h3>
@@ -75,8 +102,8 @@ const App = () => {
 
       <h3>Contacts</h3>
 
-      <Contacts contacts={contacts} filter={filter} setContacts={setContacts} />
-
+      <Contacts contacts={contacts} filter={filter} 
+      setContacts={setContacts} setChangeMessage={setChangeMessage} />
     </div>
 
   )
