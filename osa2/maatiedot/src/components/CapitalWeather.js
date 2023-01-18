@@ -3,6 +3,7 @@ import axios from "axios";
 
 const CapitalWeather = ({ city }) => {
     const api_key = 'poistettu'
+
     const [weather, setWeather] = useState([]);
 
     useEffect(() => {
