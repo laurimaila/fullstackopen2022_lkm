@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
+import DeleteContact from './components/DeleteContact'
 
 
 
@@ -8,17 +9,13 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setContacts(response.data)
+    personService
+      .getAll()
+      .then(initialNotes => {
+        setContacts(initialNotes)
       })
   }, [])
-  console.log('render', contacts.length, 'contacts')
 
   const addNumber = (event) => {
     event.preventDefault()
@@ -29,11 +26,19 @@ const App = () => {
     if (contacts.find(cont => cont.name === newName)) {
       alert(`${newName} is already added to phonebook`)
     } else {
-      setContacts(contacts.concat(numberObject))
+      personService
+        .create(numberObject)
+        .then(returnedNote => {
+          setContacts(contacts.concat(returnedNote))
+          setNewName('')
+          setNewNumber('')
+        })
       console.log("added", newName)
     }
     setNewName('')
   }
+  
+
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -57,7 +62,7 @@ const App = () => {
 
       <h3>Contacts</h3>
 
-      <Contacts contacts={contacts} filter={filter} />
+      <Contacts contacts={contacts} filter={filter} setContacts={setContacts} />
 
     </div>
 
@@ -104,14 +109,33 @@ const Filter = ({ filter, setFilter }) => {
   )
 }
 
-const Contacts = ({ contacts, filter }) => (
-  <ul>
-    {contacts.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()) 
-    || filter === '')
-      .map(contact =>
-        <li key={contact.name}>{contact.name} {contact.number}</li>
-      )}
-  </ul>
-)
+
+const Contacts = ({ contacts, filter, setContacts }) => {
+
+  const deleteContact = (id) => {
+    const contactToDelete = contacts.find(n => n.id === id)
+    if (window.confirm(`Delete ${contactToDelete.name}?`)) {
+      personService
+        .deleteData(id)
+        .then(() => {
+          setContacts(contacts.filter(n => n.id !== id))
+        })
+    }
+  }
+
+  return (
+    <ul>
+      {contacts.filter(f => f.name.toLowerCase().includes(filter.toLowerCase())
+        || filter === '')
+        .map(contact =>
+          <li key={contact.name}>{contact.name} {contact.number}
+            {' '}<button onClick={() =>
+              deleteContact(contact.id)}>Delete</button>
+          </li>
+        )}
+    </ul>
+  );
+}
 
 export default App
+
