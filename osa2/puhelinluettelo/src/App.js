@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
-import DeleteContact from './components/DeleteContact'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+import Contacts from './components/Contacts'
 
 
 
@@ -9,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+
   useEffect(() => {
     personService
       .getAll()
@@ -24,21 +27,29 @@ const App = () => {
       number: newNumber
     }
     if (contacts.find(cont => cont.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+
+      const contactToChange = contacts.find(cont => cont.name === newName)
+      if (window.confirm(`${contactToChange.name} is already added to phonebook, replace the old number with a new one?`)) {
+        personService
+          .update(contactToChange.id, numberObject)
+          .then(() => {
+            setContacts(contacts.map(f => f.id !== contactToChange.id ? f : numberObject
+            ))
+          })
+      }
     } else {
+
       personService
         .create(numberObject)
         .then(returnedNote => {
           setContacts(contacts.concat(returnedNote))
-          setNewName('')
-          setNewNumber('')
         })
       console.log("added", newName)
     }
-    setNewName('')
-  }
-  
 
+    setNewName('')
+    setNewNumber('')
+  }
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -47,7 +58,6 @@ const App = () => {
   const handleNumberChange = (event) => {
     setNewNumber(event.target.value)
   }
-
 
   return (
     <div>
@@ -69,73 +79,5 @@ const App = () => {
   )
 
 }
-const PersonForm = ({ addNumber, newName, handleNameChange, newNumber, handleNumberChange }) => {
-
-  return (
-    <div>
-
-
-      <form onSubmit={addNumber}>
-
-        <div>
-          Name: <input
-            value={newName}
-            onChange={handleNameChange}
-          />
-        </div>
-
-        <div>Number: <input
-          value={newNumber}
-          onChange={handleNumberChange} />
-        </div>
-
-        <div>
-          <button type="submit">Add</button>
-        </div>
-
-      </form>
-    </div>
-  )
-}
-
-const Filter = ({ filter, setFilter }) => {
-  return (
-    <div>
-      Filter shown with: <input
-        value={filter}
-        onChange={event => setFilter(event.target.value)}
-      />
-    </div>
-  )
-}
-
-
-const Contacts = ({ contacts, filter, setContacts }) => {
-
-  const deleteContact = (id) => {
-    const contactToDelete = contacts.find(n => n.id === id)
-    if (window.confirm(`Delete ${contactToDelete.name}?`)) {
-      personService
-        .deleteData(id)
-        .then(() => {
-          setContacts(contacts.filter(n => n.id !== id))
-        })
-    }
-  }
-
-  return (
-    <ul>
-      {contacts.filter(f => f.name.toLowerCase().includes(filter.toLowerCase())
-        || filter === '')
-        .map(contact =>
-          <li key={contact.name}>{contact.name} {contact.number}
-            {' '}<button onClick={() =>
-              deleteContact(contact.id)}>Delete</button>
-          </li>
-        )}
-    </ul>
-  );
-}
-
 export default App
 
