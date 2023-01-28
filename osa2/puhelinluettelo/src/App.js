@@ -29,13 +29,13 @@ const App = () => {
       name: newName,
       number: newNumber,
       id: contacts.length + 1
-      
+
     }
     if (contacts.find(cont => cont.name === newName)) {
-      
+
       const contactToChange = contacts.find(cont => cont.name === newName)
       if (window.confirm(`${contactToChange.name} is already added to phonebook, replace the old number with a new one?`)) {
-        numberObject.id=contactToChange.id
+        numberObject.id = contactToChange.id
         personService
           .update(contactToChange.id, numberObject)
           .then(() => {
@@ -47,23 +47,21 @@ const App = () => {
             setTimeout(() => {
               setChangeMessage(null)
             }, 3000)
-          }).catch(error => {
-              setErrorMessage(
-                `Information of ${contactToChange.name} has already been removed from server`
-              )
-              
-              setTimeout(() => {
-                setErrorMessage(null)
-              }, 5000)
-            }
-          )
+          })
+          .catch(error => {
+            setErrorMessage(error.response.data.error)
+
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 5000)
+          })
       }
     } else {
 
       personService
         .create(numberObject)
-        .then(returnedNote => {
-          setContacts(contacts.concat(returnedNote))
+        .then(returnedPerson => {
+          setContacts(contacts.concat(returnedPerson))
           setChangeMessage(
             `Added ${numberObject.name}`
           )
@@ -71,7 +69,14 @@ const App = () => {
             setChangeMessage(null)
           }, 3000)
         })
-        
+        .catch(error => {
+          setErrorMessage(error.response.data.error)
+
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+        })
+
     }
 
     setNewName('')
@@ -90,8 +95,8 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
 
-      <Notification message={changeMessage}/>
-      <ErrorNotification message={errorMessage}/>
+      <Notification message={changeMessage} />
+      <ErrorNotification message={errorMessage} />
 
       <Filter filter={filter} setFilter={setFilter} />
 
@@ -102,8 +107,8 @@ const App = () => {
 
       <h3>Contacts</h3>
 
-      <Contacts contacts={contacts} filter={filter} 
-      setContacts={setContacts} setChangeMessage={setChangeMessage} />
+      <Contacts contacts={contacts} filter={filter}
+        setContacts={setContacts} setChangeMessage={setChangeMessage} />
     </div>
 
   )
