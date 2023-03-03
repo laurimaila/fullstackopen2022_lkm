@@ -4,4 +4,5 @@
 ## Part 1 - Introduction to React - completed
 ## Part 2 - Communicating with server - completed
 ## Part 3 - Programming a server with NodeJS and Express - completed
+## Part 9 - TypeScript - in progress
 ## Part 12 - Containers - in progress
